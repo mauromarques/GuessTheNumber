@@ -12,7 +12,8 @@ from common_comm import send_dict, recv_dict, sendrecv_dict
 from Crypto.Cipher import AES
 
 # Dicionário com a informação relativa aos clientes
-gamers = {'name':[],'sock_id':[]}
+gamers = {'name':[],'sock_id':[], 'segredo':[], 'max':[], 'jogadas':[], 'resultado':[]}
+header = ['name','sock_id','segredo','max', 'jogadas', 'resultado']
 
 # return the client_id of a socket or None
 def find_client_id (client_sock):
@@ -67,6 +68,11 @@ def new_msg (client_sock):
 # execute the operation and obtain the response (consider also operations not available)
 # send the response to the client
 
+def numberToCompare(client_sock):
+	id = find_client_id(client_sock)
+	for i in range(0, len(gamers['sock_id'])):
+		if gamers['sock_id'][i] == id:
+			return gamers['segredo'][i]
 
 #
 # Suporte da criação de um novo jogador - operação START
@@ -75,13 +81,18 @@ def new_client (client_sock, request):
 	name = request['client_id']
 	sock_id = find_client_id(client_sock)
 	if name in gamers['name']:
-		response = {'op': "START", 'status': 'id already found'}
+		response = {'op': "START", 'status': False, 'error': "Cliente existente"}
 		send_dict(client_sock, response)
 	else:
 		gamers['name'].append(name)
 		gamers['sock_id'].append(sock_id)
+		n = random.randint(1, 2)
+		secret = random.randint(0, 100)
+		gamers['segredo'].append(secret)
+		gamers['max'].append(n)
+		gamers['jogadas'].append(0)
 		print(gamers)
-		response = {'op': "START", 'status': 'id added to gamers'}
+		response = {'op': "START", 'status': True, 'max_attempts': n}
 		send_dict(client_sock, response)
 	return None
 # detect the client in the request
@@ -95,7 +106,18 @@ def new_client (client_sock, request):
 # Suporte da eliminação de um cliente
 #
 def clean_client (client_sock):
-	return None
+	id = find_client_id(client_sock)
+	print("numero de gamers: " + str(len(gamers['sock_id'])))
+	for i in range(0, len(gamers['sock_id'])):
+		print("index: "+str(i))
+		if gamers['sock_id'][i] == id:
+			gamers['segredo'].pop(i)
+			gamers['sock_id'].pop(i)
+			gamers['name'].pop(i)
+			gamers['max'].pop(i)
+			gamers['jogadas'].pop(i)
+			return True
+	return False
 # obtain the client_id from his socket and delete from the dictionary
 
 
@@ -103,8 +125,15 @@ def clean_client (client_sock):
 # Suporte do pedido de desistência de um cliente - operação QUIT
 #
 def quit_client (client_sock, request):
-	response = {'op': "QUIT", 'status': 'ok'}
-	send_dict(client_sock, response)
+	if find_client_id(client_sock) in gamers['sock_id']:
+		response = {'op': "QUIT", 'status': True}
+		send_dict(client_sock, response)
+		update_file(find_client_id(client_sock), 'DESISTENCIA')
+		clean_client(client_sock)
+	else:
+		response = {'op': "QUIT", 'status': False, 'error': "cliente inexistente"}
+		send_dict(client_sock, response)
+	print("CURRENT GAMERS: "+str(gamers))
 	return None
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
@@ -117,6 +146,9 @@ def quit_client (client_sock, request):
 # Suporte da criação de um ficheiro csv com o respectivo cabeçalho
 #
 def create_file ():
+	with open('serverRecords.csv', 'w') as fileCSV:
+		writer = csv.DictWriter(fileCSV, fieldnames=header)
+		writer.writeheader()
 	return None
 # create report csv file with header
 
@@ -125,6 +157,16 @@ def create_file ():
 # Suporte da actualização de um ficheiro csv com a informação do cliente e resultado
 #
 def update_file (client_id, result):
+	with open('serverRecords.csv', 'a') as fileCSV:
+		writer = csv.DictWriter(fileCSV, fieldnames=header)
+		for i in range(0, len(gamers['sock_id'])):
+			print("index: "+str(i))
+			print("Gamer: "+str(gamers['sock_id'][i]))
+			print("Cliente: " + str(client_id))
+			if client_id == gamers['sock_id'][i]:
+				print("client found")
+				di = {'name': gamers['name'][i], 'sock_id': gamers['sock_id'][i], 'segredo': gamers['segredo'][i], 'max': gamers['max'][i],'jogadas': gamers['jogadas'][i], 'resultado': result}
+		writer.writerow(di)
 	return None
 # update report csv file with the result from the client
 
@@ -134,15 +176,24 @@ def update_file (client_id, result):
 #
 def guess_client (client_sock, request):
 
-	if request['number'] == segredo:
-		response = {'op': "GUESS", 'status': True, 'result':"equals"}
+	if find_client_id(client_sock) in gamers['sock_id']:
+		segredo = numberToCompare(client_sock)
+		if request['number'] == segredo:
+			response = {'op': "GUESS", 'status': True, 'result':"equals"}
+			send_dict(client_sock, response)
+		if request['number'] > segredo:
+			response = {'op': "GUESS", 'status': True, 'result':"larger"}
+			send_dict(client_sock, response)
+		if request['number'] < segredo:
+			response = {'op': "GUESS", 'status': True, 'result':"smaller"}
+			send_dict(client_sock, response)
+		for i in range(0, len(gamers['sock_id'])):
+			if find_client_id(client_sock) == gamers['sock_id'][i]:
+				gamers['jogadas'][i] = gamers['jogadas'][i] + 1
+	else:
+		response = {'op': "GUESS", 'status': False, 'error': "Client inexistente"}
 		send_dict(client_sock, response)
-	if request['number'] > segredo:
-		response = {'op': "GUESS", 'status': True, 'result':"larger"}
-		send_dict(client_sock, response)
-	if request['number'] < segredo:
-		response = {'op': "GUESS", 'status': True, 'result':"smaller"}
-		send_dict(client_sock, response)
+
 	return None
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
@@ -153,8 +204,22 @@ def guess_client (client_sock, request):
 # Suporte do pedido de terminação de um cliente - operação STOP
 #
 def stop_client (client_sock, request):
-	response = {'op': "STATUS", 'status': 'ok'}
-	send_dict(client_sock, response)
+	if find_client_id(client_sock) in gamers['sock_id']:
+		response = {'op': "STOP", 'status': True}
+		send_dict(client_sock, response)
+		for i in range(0, len(gamers['sock_id'])):
+			if find_client_id(client_sock) == gamers['sock_id'][i]:
+				gamers['jogadas'][i] = request['attempts']
+				if gamers['segredo'][i] == request['number']:
+					update_file(find_client_id(client_sock), "SUCCESS")
+				else:
+					update_file(find_client_id(client_sock), "FAILURE")
+		clean_client(client_sock)
+
+	else:
+		response = {'op': "STOP", 'status': False, 'error': "cliente inexistente"}
+		send_dict(client_sock, response)
+	print("CURRENT GAMERS: " + str(gamers))
 	return None
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
@@ -162,7 +227,6 @@ def stop_client (client_sock, request):
 # eliminate client from dictionary
 # return response message with result or error message
 
-segredo = random.randint(0, 100)
 def main():
 	# validate the number of arguments and eventually print error message and exit with error
 	# verify type of of arguments and eventually print error message and exit with error

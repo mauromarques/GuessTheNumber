@@ -38,7 +38,10 @@ def quit_action (client_sock, attempts):
 	response = sendrecv_dict(client_sock, request)
 
 	if validate_response(client_sock, response):
-		print("resposta do servidor %s" % (response))
+		if response['status']:
+			print("Jogo terminado com sucesso.")
+		else:
+			print("Impossível terminar um jogo que não foi iniciado.")
 	else:
 		print("Erro: resposta do servidor não é valida")
 	return None
@@ -64,23 +67,39 @@ def run_client (client_sock, client_id):
 
 	emUso = True
 	jogadas = 0
+	jogMax = None
+	auto=False
+	nextCom = ""
+	lastAttempt = None
 	while emUso:
 
-		inp = input("Comando: ")
-		comando = inp.upper()
+		if auto == False:
+			inp = input("Comando: ")
+			comando = inp.upper()
+		else:
+			comando=nextCom
+			auto = False
 
 		if comando == "START":
 			request = {'op': 'START', 'client_id': client_id}
 			response = sendrecv_dict(client_sock, request)
 
 			if validate_response(client_sock, response):
-				print("resposta do servidor %s" % (response))
+				if response['status'] == False:
+					print("Erro: "+response['error'])
+				else:
+					message = "Jogo iniciado, tens " + str(response['max_attempts']) + " jogadas para acertar o segredo."
+					jogMax = response['max_attempts']
+					jogadas = 0
+					print(message)
 			else:
 				print("Erro: resposta do servidor não é valida")
 
 
 		if comando == "QUIT":
 			quit_action(client_sock, jogadas)
+			jogadas = 0
+			jogMax = None
 
 
 		if comando == "GUESS":
@@ -107,31 +126,45 @@ def run_client (client_sock, client_id):
 					print("Numero deve estar entre 0 e 100")
 					number_str = input("Numero para jogar: ")
 
+
 			request = {'op': 'GUESS', 'number': number}
-			jogadas = jogadas+1
 			lastAttempt = number
-			response = sendrecv_dict(client_sock, request)
-
-			if validate_response(client_sock, response):
-				if response['status']:
-					if response['result'] == "equals":
-						print("Parabéns, acertaste o número!")
-					elif response['result'] == "smaller":
-						print("O número secreto é maior!")
-					elif response['result'] == "larger":
-						print("O número secreto é menor!")
-				else:
-					print(response['error'])
-
+			if jogadas == jogMax:
+				continue
 			else:
-				print("Erro: resposta do servidor não é valida")
+				response = sendrecv_dict(client_sock, request)
+				if validate_response(client_sock, response):
+					jogadas = jogadas + 1
+					if response['status']:
+						if response['result'] == "equals":
+							print("Parabéns, acertaste o número!")
+							auto = True
+							nextCom = "STOP"
+							continue
+						elif response['result'] == "smaller":
+							print("O número secreto é maior!")
+						elif response['result'] == "larger":
+							print("O número secreto é menor!")
+
+						print("Max: " + str(jogMax) + " Jogadas: " + str(jogadas))
+						if jogadas == jogMax:
+							print("Atingiu o limite de jogadas! Comece outro jogo para tentar novamente.")
+							auto = True
+							nextCom = "STOP"
+							continue
+					else:
+						print(response['error'])
+
+				else:
+					print("Erro: resposta do servidor não é valida")
 
 		if comando == "STOP":
 			request = {'op': 'STOP', 'number': lastAttempt, 'attempts': jogadas}
 			response = sendrecv_dict(client_sock, request)
 
 			if validate_response(client_sock, response):
-				print("resposta do servidor %s" % (response))
+				jogadas = 0
+				jogMax = None
 			else:
 				print("Erro: resposta do servidor não é valida")
 
