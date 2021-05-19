@@ -16,6 +16,7 @@ def main ():
 	client_s, client_addr = tcp_s.accept ()
 	
 	request = recv_dict (client_s)
+	print(request)
 	cipherkey = base64.b64decode (request['cipher'])
 	cipher = AES.new (cipherkey, AES.MODE_ECB)
 
