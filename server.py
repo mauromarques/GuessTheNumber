@@ -7,6 +7,7 @@ import json
 import base64
 import csv
 import random
+from os import path
 from common_comm import send_dict, recv_dict, sendrecv_dict
 
 from Crypto.Cipher import AES
@@ -146,9 +147,10 @@ def quit_client (client_sock, request):
 # Suporte da criação de um ficheiro csv com o respectivo cabeçalho
 #
 def create_file ():
-	with open('serverRecords.csv', 'w') as fileCSV:
-		writer = csv.DictWriter(fileCSV, fieldnames=header)
-		writer.writeheader()
+	if path.exists('report.csv') == False:
+		with open('report.csv', 'w') as fileCSV:
+			writer = csv.DictWriter(fileCSV, fieldnames=header)
+			writer.writeheader()
 	return None
 # create report csv file with header
 
@@ -157,14 +159,12 @@ def create_file ():
 # Suporte da actualização de um ficheiro csv com a informação do cliente e resultado
 #
 def update_file (client_id, result):
-	with open('serverRecords.csv', 'a') as fileCSV:
+	with open('report.csv', 'a') as fileCSV:
 		writer = csv.DictWriter(fileCSV, fieldnames=header)
 		for i in range(0, len(gamers['sock_id'])):
-			print("index: "+str(i))
-			print("Gamer: "+str(gamers['sock_id'][i]))
-			print("Cliente: " + str(client_id))
+
 			if client_id == gamers['sock_id'][i]:
-				print("client found")
+
 				di = {'name': gamers['name'][i], 'sock_id': gamers['sock_id'][i], 'segredo': gamers['segredo'][i], 'max': gamers['max'][i],'jogadas': gamers['jogadas'][i], 'resultado': result}
 		writer.writerow(di)
 	return None

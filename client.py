@@ -105,27 +105,30 @@ def run_client (client_sock, client_id):
 		if comando == "GUESS":
 			numeroValido = False
 			numeroInteiro = False
-			number_str = input("Numero para jogar: ")
+			#number_str = input("Numero para jogar: ")
 			number = ""
 
 			#verifica se o input é um inteiro
-			while numeroInteiro != True:
+			while numeroInteiro != True or numeroValido != True:
+				numeroValido = False
+				numeroInteiro = False
+
+				number_str = input("Numero para jogar: ")
+
 				try:
 					number = int(number_str)
 					numeroInteiro = True
 				except:
 					print("Jogada deve ser um numero")
-					number_str = input("Numero para jogar: ")
+					continue
 
-			# verifica se o numero escolhido esta no intervalo correto
-			while numeroValido != True:
 				number = int(number_str)
+
 				if number >= 0 and number <= 100:
 					numeroValido = True
 				else:
 					print("Numero deve estar entre 0 e 100")
-					number_str = input("Numero para jogar: ")
-
+					continue
 
 			request = {'op': 'GUESS', 'number': number}
 			lastAttempt = number
@@ -165,6 +168,7 @@ def run_client (client_sock, client_id):
 			if validate_response(client_sock, response):
 				jogadas = 0
 				jogMax = None
+				exit(1)
 			else:
 				print("Erro: resposta do servidor não é valida")
 
@@ -175,15 +179,24 @@ def run_client (client_sock, client_id):
 def main():
 	# validate the number of arguments and eventually print error message and exit with error
 	# verify type of of arguments and eventually print error message and exit with error
+	instead3 = False
 	if len(sys.argv) != 4:
-		sys.exit("Deve passar como argumentos: client_id, Porto, Máquina")
+		if len(sys.argv) == 3:
+			instead3 = True
+		else:
+			sys.exit("Deve passar como argumentos: client_id, Porto, DNS")
 	try:
 		int(sys.argv[2])
 	except ValueError:
 		sys.exit("Porto deve ser um numero inteiro")
 	if int(sys.argv[2]) < 0:
 		sys.exit("Porto deve ser um numero inteiro positivo")
-	maquina = sys.argv[3].split(".")
+
+	if instead3:
+		maquina = "127.0.0.1".split(".")
+	else:
+		maquina = sys.argv[3].split(".")
+
 	if len(maquina) != 4:
 		sys.exit("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
 	for digito in maquina:
@@ -195,7 +208,11 @@ def main():
 			sys.exit("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
 
 	port = int(sys.argv[2])
-	hostname = sys.argv[3]
+
+	if instead3:
+		hostname = "127.0.0.1"
+	else:
+		hostname = sys.argv[3]
 
 	client_sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 	client_sock.connect ((hostname, port))
