@@ -13,7 +13,7 @@ from common_comm import send_dict, recv_dict, sendrecv_dict
 from Crypto.Cipher import AES
 
 # Dicionário com a informação relativa aos clientes
-gamers = {'name':[],'sock_id':[], 'segredo':[], 'max':[], 'jogadas':[], 'resultado':[]}
+gamers = {'name':[],'sock_id':[], 'segredo':[], 'max':[], 'jogadas':[], 'resultado':[], 'cipherkey':[]}
 header = ['name','sock_id','segredo','max', 'jogadas', 'resultado']
 
 # return the client_id of a socket or None
@@ -23,14 +23,27 @@ def find_client_id (client_sock):
 
 # Função para encriptar valores a enviar em formato json com codificação base64
 # return int data encrypted in a 16 bytes binary string and coded base64
-def encrypt_intvalue (client_id, data):
-	return None
+
+#def encrypt_intvalue (client_id, data):
+#	cipher = AES.new(cipherkey, AES.MODE_ECB)
+#	data2 = cipher.encrypt(bytes("%16d" % (data), 'utf8'))
+#	data_tosend = str(base64.b64encode(data2), 'utf8')
+#	return data_tosend
 
 
 # Função para desencriptar valores recebidos em formato json com codificação base64
 # return int data decrypted from a 16 bytes binary string and coded base64
 def decrypt_intvalue (client_id, data):
-	return None
+	for i in range(0, len(gamers['sock_id'])):
+		if gamers['sock_id'][i] == client_id:
+			cipherkey = gamers['cipherkey'][i]
+
+	cipher = AES.new(cipherkey, AES.MODE_ECB)
+	data1 = base64.b64decode(data)
+	data2 = cipher.decrypt(data1)
+	print(data2)
+	data3 = int(str(data2, 'utf8'))
+	return data3
 
 
 #
@@ -92,6 +105,7 @@ def new_client (client_sock, request):
 		gamers['segredo'].append(secret)
 		gamers['max'].append(n)
 		gamers['jogadas'].append(0)
+		gamers['cipherkey'].append(base64.b64decode(request['cipherkey']))
 		print(gamers)
 		response = {'op': "START", 'status': True, 'max_attempts': n}
 		send_dict(client_sock, response)
@@ -117,6 +131,7 @@ def clean_client (client_sock):
 			gamers['name'].pop(i)
 			gamers['max'].pop(i)
 			gamers['jogadas'].pop(i)
+			gamers['cipherkey'].pop(i)
 			return True
 	return False
 # obtain the client_id from his socket and delete from the dictionary
@@ -178,13 +193,15 @@ def guess_client (client_sock, request):
 
 	if find_client_id(client_sock) in gamers['sock_id']:
 		segredo = numberToCompare(client_sock)
-		if request['number'] == segredo:
+		jogado = decrypt_intvalue(find_client_id(client_sock),request['number'])
+
+		if jogado == segredo:
 			response = {'op': "GUESS", 'status': True, 'result':"equals"}
 			send_dict(client_sock, response)
-		if request['number'] > segredo:
+		if jogado > segredo:
 			response = {'op': "GUESS", 'status': True, 'result':"larger"}
 			send_dict(client_sock, response)
-		if request['number'] < segredo:
+		if jogado < segredo:
 			response = {'op': "GUESS", 'status': True, 'result':"smaller"}
 			send_dict(client_sock, response)
 		for i in range(0, len(gamers['sock_id'])):

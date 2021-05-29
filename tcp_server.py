@@ -23,7 +23,9 @@ def main ():
 	while 1:
 		request = recv_dict (client_s)
 		data = base64.b64decode (request['value'])
+		print(data)
 		data = cipher.decrypt (data)
+		print(data)
 		data = int (str (data, 'utf8'))
 		print ("SERVER - Valor Recebido %d" % (data))
 		
