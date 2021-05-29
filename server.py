@@ -3,27 +3,38 @@
 import sys
 import socket
 import select
-import json
 import base64
 import csv
 import random
 from os import path
-from common_comm import send_dict, recv_dict, sendrecv_dict
+from common_comm import send_dict, recv_dict
 
 from Crypto.Cipher import AES
 
-# Dicionário com a informação relativa aos clientes
+# O dicionário "gamers" armazena os dados do jogadores que estão atualmente com um jogo iniciado em seus respetivos
+# clientes. A informação é armazenada baseada na ordem em que cada cliente conecta-se ao servidor dentro de arrays para
+# cada campo de informação que será armazenado. Por exemplo, se dois jogadores, Mauro e Patrícia, estiverem a jogar ao
+# mesmo tempo, e se Mauro se conectou primeiro, seu ID pode ser consultado apartir de: gamers['sock_id'][0]; enquanto
+# que o ID de Patrícia pode ser consultado a partir de: gamers['sock_id'][1].
 gamers = {'name':[],'sock_id':[], 'segredo':[], 'max':[], 'jogadas':[], 'resultado':[], 'cipherkey':[]}
+
+# Array utilizado para inicializar o header do ficheiro .CSV que será gerado pelo servidor.
 header = ['name','sock_id','segredo','max', 'jogadas', 'resultado']
 
-# return the client_id of a socket or None
+# A partir de cada socket de cliente, é possível extrair algumas informações únicas para o identificar. Neste caso, a
+# função .getpeername() retorna um tuplo que contém o endereço do host e o porto ao qual o cliente está conectado.
+# O porto então é retornado pela função find_client_id().
 def find_client_id (client_sock):
 	peerName = client_sock.getpeername()
 	return peerName[1]
 
 # Função para encriptar valores a enviar em formato json com codificação base64
-# return int data encrypted in a 16 bytes binary string and coded base64
-
+# Cada numero inteiro comunicado entre o servidor e o cliente é encriptado por blocos usando a função AES-128 em modo ECB.
+# Primeiro identificamos a chave de cifragem relativa ao cliente atual comparando o id passado como argumento da função com
+# os IDs no dicionário "gamers".
+# Após identificada a chave de cifra correspondente, convertemos o inteiro em uma string binaria com 128 bits e a
+# codificamos no formato Base64, para que os criptogramas possam ser suportados pelo JSON.
+# Por fim, este valor codificado e encriptado é retornado pela função, para que possa ser enviado.
 def encrypt_intvalue (client_id, data):
 	for i in range(0, len(gamers['sock_id'])):
 		if gamers['sock_id'][i] == client_id:
@@ -36,7 +47,12 @@ def encrypt_intvalue (client_id, data):
 
 
 # Função para desencriptar valores recebidos em formato json com codificação base64
-# return int data decrypted from a 16 bytes binary string and coded base64
+# Cada numero inteiro comunicado entre o servidor e o cliente é encriptado por blocos usando a função AES-128 em modo ECB.
+# Primeiro identificamos a chave de cifragem relativa ao cliente atual comparando o id passado como argumento da função com
+# os IDs no dicionário "gamers".
+# Após identificada a chave de cifra correspondente, descodificamos os dados passados à função como argumento no formato
+# Base64 e descriptografamos o seu conteúdo, para que enfim possa ser codificado novamente em um valor inteiro e retornado
+# pela função.
 def decrypt_intvalue (client_id, data):
 	for i in range(0, len(gamers['sock_id'])):
 		if gamers['sock_id'][i] == client_id:
@@ -49,24 +65,10 @@ def decrypt_intvalue (client_id, data):
 	data3 = int(str(data2, 'utf8'))
 	return data3
 
-
-#
-# Incomming message structure:
-# { op = "START", client_id, [cipher] }
-# { op = "QUIT" }
-# { op = "GUESS", number }
-# { op = "STOP", number, attempts }
-#
-# Outcomming message structure:
-# { op = "START", status, max_attempts }
-# { op = "QUIT" , status }
-# { op = "GUESS", status, result }
-# { op = "STOP", status, guess }
-
-
-#
 # Suporte de descodificação da operação pretendida pelo cliente
-#
+# Esta função é chamada sempre que o servidor recebe uma nova mensagem de um cliente, sua tarefa é identificar a função
+# requisitada pelo cliente e direcioná-la para a sua respetiva função que irá processar responder ao request.
+# Caso seja feito um request de uma função fora do escopo da aplicação, o servidor não faz nada.
 def new_msg (client_sock):
 	request = recv_dict(client_sock)
 	print(request)
@@ -78,23 +80,27 @@ def new_msg (client_sock):
 		stop_client(client_sock, request)
 	if request['op'] == "GUESS":
 		guess_client(client_sock, request)
-	#response = {'value': "jamanta"}
-	#send_dict(client_sock, response)
 	return None
-# read the client request
-# detect the operation requested by the client
-# execute the operation and obtain the response (consider also operations not available)
-# send the response to the client
 
+# Esta função suporta o comando "GUESS", retornando o numero secreto associado ao cliente para que seja comparado.
 def numberToCompare(client_sock):
 	id = find_client_id(client_sock)
 	for i in range(0, len(gamers['sock_id'])):
 		if gamers['sock_id'][i] == id:
 			return gamers['segredo'][i]
 
-#
 # Suporte da criação de um novo jogador - operação START
-#
+# o "client_id" passado para o servidor (inicialmente inserido pelo utilizador na linha de comando ao executar o cliente)
+# é armazenado na variável "name".
+# A partir do socket do cliente, identificamos seu ID (porto ao qual está conectado) com a função "find_client_id".
+# Caso "name" ("client_id" enviado pelo request do cliente) já esteja presente no dicionário "gamers", o servidor irá
+# comunicar isso ao cliente com uma mensagem de status: False, e uma mensagem de erro indicando que este nome já está
+# a ser utilizado.
+# Caso contrário, a função adiciona todos os dados necessários do cliente para iniciar um jogo aos arrays do dicionário,
+# adicionando valores iniciais para todos eles (com exceção do "result", que será atribuído apenas ao fim de um jogo),
+# para que a ordem seja mantida e possamos indentificar os dados de cada cliente a jogar atraves dos índices.
+# Ao fim, o servidor envia uma resposa ao cliente com status: True e o valor encriptado de jogadas màximas que o cliente
+# pode fazer.
 def new_client (client_sock, request):
 	name = request['client_id']
 	sock_id = find_client_id(client_sock)
@@ -104,7 +110,7 @@ def new_client (client_sock, request):
 	else:
 		gamers['name'].append(name)
 		gamers['sock_id'].append(sock_id)
-		n = random.randint(10, 33)
+		n = random.randint(10, 30)
 		secret = random.randint(0, 100)
 		gamers['segredo'].append(secret)
 		gamers['max'].append(n)
@@ -114,16 +120,12 @@ def new_client (client_sock, request):
 		response = {'op': "START", 'status': True, 'max_attempts': encrypt_intvalue(sock_id,n)}
 		send_dict(client_sock, response)
 	return None
-# detect the client in the request
-# verify the appropriate conditions for executing this operation
-# obtain the secret number and number of attempts
-# process the client in the dictionary
-# return response message with results or error message
 
-
-#
 # Suporte da eliminação de um cliente
-#
+# Esta função é executada sempre que for necessário excluir um cliente do dicionario "gamers", ou seja, quando o cliente
+# se desconectar do servidor, quando terminar um jogo, ou quando desistir.
+# A função busca pelo cliente no dicionário "gamers" e caso o encontre, exclui todos os dados relativos a ele através
+# do seu índice respetivo.
 def clean_client (client_sock):
 	id = find_client_id(client_sock)
 	print("numero de gamers: " + str(len(gamers['sock_id'])))
@@ -138,13 +140,17 @@ def clean_client (client_sock):
 			gamers['cipherkey'].pop(i)
 			return True
 	return False
-# obtain the client_id from his socket and delete from the dictionary
 
-
-#
 # Suporte do pedido de desistência de um cliente - operação QUIT
-#
-def quit_client (client_sock, request):
+# A função vai primeiro checar se o cliente que está a desistir do jogo está realmente a jogar. Para fazer isso, verifica
+# se o ID do socket está presente no dicionario "gamers".
+# Caso esteja, manda uma mensagem ao cliente com status: True, atualiza o ficheiro .CSV (recorrendo à função update_file())
+# com o resultado do jogo sendo "DESISTENCIA", indicando que a partida foi terminada antes do jogador acertar o número,
+# ou antes de atingir o limite de jogadas. Por fim, retira o cliente da sua lista de jogadores ativos recorrendo à função
+# clean_client().
+# Caso contrário, manda uma mensagem ao cliente com status: False, e uma mensagem de erro que explicita o fato do cliente
+# não ter sido encontrado dentre os jogadores ativos.
+def quit_client (client_sock):
 	if find_client_id(client_sock) in gamers['sock_id']:
 		response = {'op': "QUIT", 'status': True}
 		send_dict(client_sock, response)
@@ -155,28 +161,24 @@ def quit_client (client_sock, request):
 		send_dict(client_sock, response)
 	print("CURRENT GAMERS: "+str(gamers))
 	return None
-# obtain the client_id from his socket
-# verify the appropriate conditions for executing this operation
-# process the report file with the QUIT result
-# eliminate client from dictionary
-# return response message with result or error message
 
-
-#
 # Suporte da criação de um ficheiro csv com o respectivo cabeçalho
-#
+# Esta função é chamada quando o servidor é inicializado e cria um novo ficheiro .CSV chamado "report" caso ele não
+# exista no diretório em que o server.py se encontra (Para que assim o servidor não reinicie o ficheiro toda vez que for
+# inicializado).
+# Após criação, escreve o Header do ficheiro, com base no array "Header" criado anteriormente
 def create_file ():
 	if path.exists('report.csv') == False:
 		with open('report.csv', 'w') as fileCSV:
 			writer = csv.DictWriter(fileCSV, fieldnames=header)
 			writer.writeheader()
 	return None
-# create report csv file with header
 
-
-#
 # Suporte da actualização de um ficheiro csv com a informação do cliente e resultado
-#
+# Esta função atualiza o ficheiro .CSV com os dados de um jogador quando um jogo é terminado (com sucesso, sem sucesso,
+# ou desistencia). Para isso, abre o ficheiro no modo "a" (append), para adicionar dados sem escrever por cima dos que já
+# lá estavam. Para isso, procura pelo index "i", tal que o sock_id é igual ao client_id passado como parametro da função,
+# e assim escreve todos os itens na posição "i" dos arrays no dicionário "gamers"
 def update_file (client_id, result):
 	with open('report.csv', 'a') as fileCSV:
 		writer = csv.DictWriter(fileCSV, fieldnames=header)
@@ -187,12 +189,23 @@ def update_file (client_id, result):
 				di = {'name': gamers['name'][i], 'sock_id': gamers['sock_id'][i], 'segredo': gamers['segredo'][i], 'max': gamers['max'][i],'jogadas': gamers['jogadas'][i], 'resultado': result}
 		writer.writerow(di)
 	return None
-# update report csv file with the result from the client
 
-
-#
 # Suporte da jogada de um cliente - operação GUESS
-#
+# Para que a função possa funcionar corretamente, temos que nos certificar de que o cliente que está tentando adivinhar
+# o número tem uma sessão de jogo iniciada. Ou seja, se ele estiver no dicionaário "gamers", então prosseguimos com o guess,
+# caso contrário, manda uma mensagem ao cliente com status: False e uma mensagem de erro a indicar que o cliente não
+# está inserido na lista de jogadores ativos.
+# Caso o cliente tenha um jogo iniciado.
+# Primeiro buscamos o valor do numero secreto deste cliente através da função "numberToCompare()", que é armazenado na
+# variável "segredo". Depois, descriptografamos o numero inserido pelo jogador (que é passado na mensagem enviada do cliente
+# ao servidor, e que depois é encaminhada para a função pelo parametro "request") que é armazenado na variável "jogado".
+# Caso o numero jogado seja igual ao segredo, o servidor envia uma mensagem ao cliente com status: True, e result: "equals",
+# a indicar que o jogador acertou o número.
+# Caso o número jogado seja maior que o segredo, o servidor envia uma mensagem ao cliente com status: True, e result: "larger",
+# a indicar que o jogador jogou um número maior que o segredo.
+# Caso o número jogado seja menor que o segredo, o servidor envia uma mensagem ao cliente com status: True, e result: "smaller",
+# a indicar que o jogador jogou um número menor que o segredo.
+# Por fim, atualiza no dicionário "gamers" o número de jogadas feitas.
 def guess_client (client_sock, request):
 
 	if find_client_id(client_sock) in gamers['sock_id']:
@@ -216,14 +229,22 @@ def guess_client (client_sock, request):
 		send_dict(client_sock, response)
 
 	return None
-# obtain the client_id from his socket
-# verify the appropriate conditions for executing this operation
-# return response message with result or error message
 
-
-#
 # Suporte do pedido de terminação de um cliente - operação STOP
-#
+# Esta operação ocorre sempre que um jogo é terminado (quando o jogador acerta o segredo, ou quando faz mais jogadas do que
+# podia).
+# Para que um jogo seja encerrado, o cliente precisa estar na lista de jogadores ativos, ou seja, no dicionário "gamers".
+# Caso o cliente naão esteja em um jogo ativo, a função envia uma mensagem ao cliente com status: False e uma mensagem de
+# erro a indicar que o cliente não se encontra na lista de jogadores ativos.
+# Caso o cliente esteja em um jogo ativo, o servidor envia uma mensagem ao cliente com status: True, a indicar que a finalização
+# do jogo foi processada.
+# O processamento do término de um jogo dá-se da seguinte forma:
+# 1- O servidor atualiza no dicionário "gamers" o numero de jogadas que o jogador fez. Para isso, deve descriptografar o inteiro
+# enviado pelo cliente, com auxílio da função decrypt_intvalue().
+# 2- O servidor verifica se o último número jogado pelo utilizador (que também deve ser descriptografado) é igual ao segredo.
+# Caso seja, atualiza o ficheiro .CSV com os dados do cliente e o resultado final "SUCCESS". Caso não seja, atualiza o
+# ficheiro .CSV com os dados do cliente e o resultado final "FAILURE"
+# 3- Por fim, elimina o cliente da lista de jogadores ativos através da função "clean_client()"
 def stop_client (client_sock, request):
 	if find_client_id(client_sock) in gamers['sock_id']:
 		response = {'op': "STOP", 'status': True}
@@ -242,11 +263,6 @@ def stop_client (client_sock, request):
 		send_dict(client_sock, response)
 	print("CURRENT GAMERS: " + str(gamers))
 	return None
-# obtain the client_id from his socket
-# verify the appropriate conditions for executing this operation
-# process the report file with the SUCCESS/FAILURE result
-# eliminate client from dictionary
-# return response message with result or error message
 
 def main():
 	# validate the number of arguments and eventually print error message and exit with error
@@ -277,7 +293,6 @@ def main():
 		except ValueError:
 			# Sockets may have been closed, check for that
 			for client_sock in clients:
-				#if client_sock.fileno () == -1: client_sock.remove(client) # closed
 				if client_sock.fileno() == -1: client_sock.remove()
 			continue # Reiterate select
 
