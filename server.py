@@ -24,11 +24,15 @@ def find_client_id (client_sock):
 # Função para encriptar valores a enviar em formato json com codificação base64
 # return int data encrypted in a 16 bytes binary string and coded base64
 
-#def encrypt_intvalue (client_id, data):
-#	cipher = AES.new(cipherkey, AES.MODE_ECB)
-#	data2 = cipher.encrypt(bytes("%16d" % (data), 'utf8'))
-#	data_tosend = str(base64.b64encode(data2), 'utf8')
-#	return data_tosend
+def encrypt_intvalue (client_id, data):
+	for i in range(0, len(gamers['sock_id'])):
+		if gamers['sock_id'][i] == client_id:
+			cipherkey = gamers['cipherkey'][i]
+
+	cipher = AES.new(cipherkey, AES.MODE_ECB)
+	data2 = cipher.encrypt(bytes("%16d" % (data), 'utf8'))
+	data_tosend = str(base64.b64encode(data2), 'utf8')
+	return data_tosend
 
 
 # Função para desencriptar valores recebidos em formato json com codificação base64
@@ -100,14 +104,14 @@ def new_client (client_sock, request):
 	else:
 		gamers['name'].append(name)
 		gamers['sock_id'].append(sock_id)
-		n = random.randint(1, 2)
+		n = random.randint(10, 33)
 		secret = random.randint(0, 100)
 		gamers['segredo'].append(secret)
 		gamers['max'].append(n)
 		gamers['jogadas'].append(0)
 		gamers['cipherkey'].append(base64.b64decode(request['cipherkey']))
 		print(gamers)
-		response = {'op': "START", 'status': True, 'max_attempts': n}
+		response = {'op': "START", 'status': True, 'max_attempts': encrypt_intvalue(sock_id,n)}
 		send_dict(client_sock, response)
 	return None
 # detect the client in the request
@@ -226,8 +230,8 @@ def stop_client (client_sock, request):
 		send_dict(client_sock, response)
 		for i in range(0, len(gamers['sock_id'])):
 			if find_client_id(client_sock) == gamers['sock_id'][i]:
-				gamers['jogadas'][i] = request['attempts']
-				if gamers['segredo'][i] == request['number']:
+				gamers['jogadas'][i] = decrypt_intvalue(gamers['sock_id'][i],request['attempts'])
+				if gamers['segredo'][i] == decrypt_intvalue(gamers['sock_id'][i],request['number']):
 					update_file(find_client_id(client_sock), "SUCCESS")
 				else:
 					update_file(find_client_id(client_sock), "FAILURE")

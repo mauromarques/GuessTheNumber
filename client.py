@@ -101,8 +101,9 @@ def run_client (client_sock, client_id):
 				if response['status'] == False:
 					print("Erro: "+response['error'])
 				else:
-					message = "Jogo iniciado, tens " + str(response['max_attempts']) + " jogadas para acertar o segredo."
-					jogMax = response['max_attempts']
+					max = decrypt_intvalue(cipherkey, response['max_attempts'])
+					message = "Jogo iniciado, tens " + str(max) + " jogadas para acertar o segredo."
+					jogMax = max
 					jogadas = 0
 					print(message)
 			else:
@@ -175,7 +176,7 @@ def run_client (client_sock, client_id):
 					print("Erro: resposta do servidor não é valida")
 
 		if comando == "STOP":
-			request = {'op': 'STOP', 'number': lastAttempt, 'attempts': jogadas}
+			request = {'op': 'STOP', 'number': encrypt_intvalue(cipherkey, number), 'attempts': encrypt_intvalue(cipherkey, jogadas)}
 			response = sendrecv_dict(client_sock, request)
 
 			if validate_response(client_sock, response):
