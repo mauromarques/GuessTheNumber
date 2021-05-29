@@ -1,5 +1,21 @@
 \BOOKMARK [0][-]{chapter.1}{Introdu\347\343o}{}% 1
 \BOOKMARK [0][-]{chapter.2}{Metodologia}{}% 2
-\BOOKMARK [0][-]{chapter.3}{Resultados}{}% 3
-\BOOKMARK [0][-]{chapter.4}{An\341lise}{}% 4
-\BOOKMARK [0][-]{chapter.5}{Conclus\365es}{}% 5
+\BOOKMARK [1][-]{section.2.1}{Servidor}{chapter.2}% 3
+\BOOKMARK [2][-]{subsection.2.1.1}{Dicion\341rio e Array}{section.2.1}% 4
+\BOOKMARK [2][-]{subsection.2.1.2}{Fun\347\343o find\137client\137id}{section.2.1}% 5
+\BOOKMARK [2][-]{subsection.2.1.3}{Fun\347\343o encrypt\137intvalue}{section.2.1}% 6
+\BOOKMARK [2][-]{subsection.2.1.4}{Fun\347\343o decrypt\137intvalue}{section.2.1}% 7
+\BOOKMARK [2][-]{subsection.2.1.5}{Fun\347\343o new\137msg}{section.2.1}% 8
+\BOOKMARK [2][-]{subsection.2.1.6}{Fun\347\343o numberToCompare}{section.2.1}% 9
+\BOOKMARK [2][-]{subsection.2.1.7}{Fun\347\343o new\137client}{section.2.1}% 10
+\BOOKMARK [2][-]{subsection.2.1.8}{Fun\347\343o clean\137client}{section.2.1}% 11
+\BOOKMARK [2][-]{subsection.2.1.9}{Fun\347\343o quit\137client}{section.2.1}% 12
+\BOOKMARK [2][-]{subsection.2.1.10}{Fun\347\343o create\137file}{section.2.1}% 13
+\BOOKMARK [2][-]{subsection.2.1.11}{Fun\347\343o update\137file}{section.2.1}% 14
+\BOOKMARK [2][-]{subsection.2.1.12}{Fun\347\343o guess\137client}{section.2.1}% 15
+\BOOKMARK [2][-]{subsection.2.1.13}{Fun\347\343o stop\137client}{section.2.1}% 16
+\BOOKMARK [2][-]{subsection.2.1.14}{Fun\347\343o main}{section.2.1}% 17
+\BOOKMARK [1][-]{section.2.2}{Cliente}{chapter.2}% 18
+\BOOKMARK [0][-]{chapter.3}{Resultados}{}% 19
+\BOOKMARK [0][-]{chapter.4}{An\341lise}{}% 20
+\BOOKMARK [0][-]{chapter.5}{Conclus\365es}{}% 21
