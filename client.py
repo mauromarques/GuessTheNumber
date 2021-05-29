@@ -9,7 +9,10 @@ from common_comm import send_dict, recv_dict, sendrecv_dict
 from Crypto.Cipher import AES
 
 # Função para encriptar valores a enviar em formato json com codificação base64
-# return int data encrypted in a 16 bytes binary string coded in base64
+# Cada numero inteiro comunicado entre o servidor e o cliente é encriptado por blocos usando a função AES-128 em modo ECB.
+# Como a chave de cifragem é passada como argumento da função, convertemos o inteiro em uma string binaria com 128 bits e a
+# codificamos no formato Base64, para que os criptogramas possam ser suportados pelo JSON.
+# Por fim, este valor codificado e encriptado é retornado pela função, para que possa ser enviado.
 def encrypt_intvalue (cipherkey, data):
 	cipher = AES.new(cipherkey, AES.MODE_ECB)
 	data2 = cipher.encrypt(bytes("%16d" % (data), 'utf8'))
@@ -18,7 +21,10 @@ def encrypt_intvalue (cipherkey, data):
 
 
 # Função para desencriptar valores recebidos em formato json com codificação base64
-# return int data decrypted from a 16 bytes binary strings coded in base64
+# Cada numero inteiro comunicado entre o servidor e o cliente é encriptado por blocos usando a função AES-128 em modo ECB.
+# Como a chave de cifragem é passada como argumento da função, descodificamos os dados passados à função como argumento no formato
+# Base64 e descriptografamos o seu conteúdo, para que enfim possa ser codificado novamente em um valor inteiro e retornado
+# pela função.
 def decrypt_intvalue (cipherkey, data):
 	cipher = AES.new(cipherkey, AES.MODE_ECB)
 	data = base64.b64decode(data)
@@ -27,7 +33,12 @@ def decrypt_intvalue (cipherkey, data):
 	return data
 
 
-# verify if response from server is valid or is an error message and act accordingly
+# Esta função valida a resposta do servidor recebida pelo cliente. Para que uma resposta seja valida, consideramos que
+# ela deve ser do tipo " 'op': xxxx, 'status': xxxx ", já que são campos em comum em todas as mensagens enviadas pelo servidor,
+# e qualquer outro formato não é válido.
+# Portanto, para validar a resposta, usamos um "try-catch" que tenta aceder aos valores de 'op' e 'status'. Caso isso
+# seja possiível, ou seja, caso os campos existam na resposta, a função retorna True. Caso o acesso aos campos falhe,
+# a função retorna "False"
 def validate_response (client_sock, response):
 	try:
 		op = response['op']
@@ -38,7 +49,8 @@ def validate_response (client_sock, response):
 
 	return None
 
-# process QUIT operation
+# Processa a operação QUIT
+# Quando o utilizador fizer o input do comando QUIT, esta função será chamada.
 def quit_action (client_sock, attempts):
 	request = {'op': 'QUIT'}
 	response = sendrecv_dict(client_sock, request)
@@ -51,20 +63,6 @@ def quit_action (client_sock, attempts):
 	else:
 		print("Erro: resposta do servidor não é valida")
 	return None
-
-
-# Outcomming message structure:
-# { op = "START", client_id, [cipher] }
-# { op = "QUIT" }
-# { op = "GUESS", number }
-# { op = "STOP", number, attempts }
-#
-# Incomming message structure:
-# { op = "START", status, max_attempts }
-# { op = "QUIT" , status }
-# { op = "GUESS", status, result }
-# { op = "STOP", status, guess }
-
 
 #
 # Suporte da execução do cliente

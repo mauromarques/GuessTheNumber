@@ -75,7 +75,7 @@ def new_msg (client_sock):
 	if request['op'] == "START":
 		new_client(client_sock, request)
 	if request['op'] == "QUIT":
-		quit_client(client_sock, request)
+		quit_client(client_sock)
 	if request['op'] == "STOP":
 		stop_client(client_sock, request)
 	if request['op'] == "GUESS":
