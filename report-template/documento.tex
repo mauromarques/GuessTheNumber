@@ -79,12 +79,12 @@
 
 %%%%%% RESUMO %%%%%%
 \begin{abstract}
-Este relatório tem como objetivo descrever a implementação e a intereção entre um servidor e um ou mais clientes. Para isso, será detalhadamente apresentado o funcionamento/criação de um jogo. O jogo consiste em o cliente adivinhar um número inteiro aleatório entre 0 e 100, o número secreto, gerado aleatoriamente pelo servidor.
+Este relatório tem como objetivo descrever a implementação e a intereção entre um servidor e um ou mais clientes. Para isso, será detalhadamente apresentado o funcionamento/criação de um jogo. O jogo consiste em o cliente adivinhar um número inteiro aleatório entre 0 e 100, o número secreto, gerado aleatoriamente pelo servidor.Serão detalhadamente descritos o programa cliente e o programa servidor e a criptogafia a eles associados bem como o funcionamento criação e desenvolvimento de testes funcionais e unitários. Com base em imagens de todas as funções em ambos os programas e imagens da intereção no terminal entre um ou mais clientes e o servidor é possível perceber o funcionamento correto da aplicação.
 \end{abstract}
 
 \tableofcontents
 % \listoftables     % descomentar se necessário
-% \listoffigures    % descomentar se necessário
+ \listoffigures    % descomentar se necessário
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -96,10 +96,12 @@ Este relatório tem como objetivo descrever a implementação e a intereção en
 \label{chap.introducao}
 O objetivo deste trabalho é explicar,enumerar e descrever o desenvolvimento e funcionamento de um servidor que suporte a geração de um número inteiro aleatório (entre 0 e 100), o número secreto, bem como o número máximo de tentativas (entre 10 e 30) concedidas para o adivinhar. E um cliente que permita adivinhar esse número secreto. Ou seja um jogo de adivinha o número secreto.
 O servidor nunca deverá aceitar dois clientes com a mesma identificação a jogar simultaneamente e deverá criar e atualizar um ficheiro designado por report.csv onde vai escrevendo os resultados dos diversos clientes quando estes terminam o jogo. O cliente pode desistir em qualquer altura e o jogo acaba quando ele adivinha o número secreto ou quando esgota o número máximo de tentativas que dispunha para jogar. Caso o cliente exceda o número de jogadas de que dispunha o jogo será considerado sem sucesso mesmo que ele tenha adivinhado o número. Quando o jogo acaba corretamente o cliente deve escrever no monitor uma mensagem a indicar se adivinhou ou não o número secreto e quantas jogadas efectuou. Por sua vez o servidor acrescenta ao ficheiro a informação relativa ao jogo: cliente; número secreto; número máximo de jogadas; número de jogadas efectuadas; e o resultado obtido pelo cliente (desistência ou sucessso ou insucessso).
+Também será abordado e aprofundado o conceito de criptogafia e a realização e funcionamento de testes funcionais e unitários bem como a explicação detalhada do desenvolvimento da aplicação.
+
 
 \chapter{Metodologia}
 \label{chap.metodologia}
-Neste capítulo será detalhadamente descrito o algoritmo e o funcionamento do progama servidor e do programa cliente.
+Neste capítulo será detalhadamente descrito o algoritmo e o funcionamento do progama servidor e do programa cliente bem como a implementação dos testes funcionais e unitários.
 \section{Servidor}
 O programa servidor consiste em gerar aleatoriamente um número entre 0 e 100 e um número máximo de tentativas entre 10 e 30 para o adivinhar. 
 	O programa servidor é constítuido por um dicionário e as seguintes funções: \textbf{find\_client\_id},\textbf{encrypt\_intvalue}, \textbf{decrypt\_intvalue}, \textbf{new\_msg}, \textbf{numberToCompare}, \textbf{new\_client}, \textbf{clean\_client}, \textbf{quit\_client}, \textbf{create\_file}, \textbf{update\_file}, \textbf{guess\_client}, \textbf{stop\_client} e \textbf{main}.
@@ -461,16 +463,131 @@ Aqui é verificado para cada elemento do array se são números inteiros ao tent
 \end{figure}
 Por fim, tendo já verificado a validade dos argumentos passados na linha de comandos, são atribuídos às suas respetivas variáveis de acordo com o modo de execução, com dois ou três argumentos.
 
+\section{Testes unitários e funcionais}
+\subsection{Testes Funcionais}
 
-\chapter{Resultados}
-\label{chap.resultados}
+Para assegurar que os programas, cliente e servidor, desenvolvidos durante este projeto estão a funcionar corretamente, de acordo com aquilo que é esperado pelos desenvolvedores, implementamos uma série de testes funcionais que se encarregam de verificar a robustez do
+código previamente descrito no capítulo de metodologia deste relatório.
 
-\chapter{Análise}
-\label{chap.analise}
+A intenção por trás da inclusão dos testes é nos certificarmos de que, quanto à inicialização de ambos os programas com a passagem de argumentos na linha de comandos, o código é capaz de identificar as falhas neste processo, comunicá-las ao utilizador (para que este
+possa inserir argumentos corretos na próxima tentativa de execução), e encerrar o programa corretamente, sem maiores impactos negativos que poderiam advir da passagem de argumentos inválidos, ou insuficientes ao sistema.
+
+Para implementar testes funcionais em Python, primeiro instalamos e importamos o pacote ‘pytest’, que suportará o desenvolvimento dos mesmos, em conjunto com os pacotes ‘Popen’ e ‘PIPE’ advindos de ‘subprocess’, num novo ficheiro chamado ‘funcTests.py’.
+
+Dentro deste ficheiro, definimos duas funções, as quais representam os dois macro-cenários de possíveis erros durante a execução inicial dos programas: ‘numArgs()’, que trata de verificar a robustez dos programas quando lidando com argumentos a menos, ou a mais, do que
+o esperado para suas respetivas execuções; e ‘invalidArgs()’, que tal como seu nome diz, irá verificar a robustez dos programas quando lidando com argumentos em formatos inválidos, ou seja, diferentes dos esperados pelo sistema ao processá-los.
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.20]{testefuncional}      
+\end{figure}
+Todos os erros relativos ao número de argumentos inválidos implicam que a execução do programa termine, com código ‘1’. Por isso fazemos uma asserção para cada teste, de que o código retornado por ele deve ser também 1. A segunda asserção também implementada para testes dentro desta função, diz respeito à mensagem que é retornada pelo programa, quando identificada a falha. Caso a mensagem retornada, seja aquela que se esperava, então o programa
+lidou corretamente com as falhas.
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.20]{testefuncional1}      
+\end{figure}
+Todos os erros relativos a tipos de argumentos inválidos implicam que a execução do programa termine, com código ‘2’. Por isso fazemos uma asserção para cada teste, de que o código retornado por ele deve ser também 2. A segunda asserção também implementada para testes dentro desta função, diz respeito à mensagem que é retornada pelo programa, quando identificada a falha. Caso a mensagem retornada, seja aquela que se esperava, então o programa lidou corretamente com as falhas.
+
+\subsection{Teste unitário}
+Para além dos testes funcionais, foi também desenvolvido, num ficheiro chamado ‘unitTests.py’, um simples teste unitário que vai testar as funções responsáveis por criptografar, e descriptografar, valores inteiros recebidos e enviados pelo programa cliente.
+Para que o teste seja eficaz, utilizamos novamente o pacote ‘pytest’. Desta vez, para realizar o teste com precisão, também utilizamos os pacotes ‘os’ e ‘base64’, que irão gerar uma chave de cifra exatamente como aquela utilizada nos programas em que as funções aparecem.
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.20]{testefuncional1}      
+\end{figure}
+Para que as funções passem este teste, encriptamos um número 1212, e depois o descriptografamos, recorrendo às funções aqui analisadas, e verificamos que o número retornado por elas após o processo de criptogra a é o mesmo. O que prova que as funções estão a
+funcionar corretamente, ou não.
+
+\chapter{Resultados/Análise}
+\label{chap.resultados/análise}
+Neste capítulo será apresentada a interação via terminal entre um ou mais clientes e o servidor.
+\begin{itemize}
+\item Jogo com um cliente e o servidor 
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.50]{guessNormal}      
+        \caption{Terminal do cliente.}
+\end{figure}
+
+A aplicação está a funcionar de modo correto. É visível que quando o comando START é introduzido a aplicação indica que o jogo foi iniciado e exibe o número de tentativas que o cliente tem disponível para adivinhar o número secreto.
+Depois, sempre que se introduz o comando GUESS, é pedido o palpite e ,após a introdução, é exibido se o número introduzido é maior, menor ou igual ao número secreto.E, também é mostrado o número de tentativas que ainda restam ao cliente para adivinhar o número secreto.
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.50]{guessNormal1}      
+        \caption{Terminal do servidor.}
+\end{figure}
+
+O servidor está a acompanhar cada etapa executada pelo cliente. Por exemplo, quando o cliente introduziu o comando START é armazenado no dicionário os dados dos jogadores que estão ativos no jogo. Neste caso, o cliente Patrícia com o "sock\_id": 40764,o número secreto : 22, o número máximo de jogadas: 16, o número de jogadas efetuadas, o resultado e o tipo de cifragem.
+
+\item Operação QUIT
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.53]{guesscomquit}      
+        \caption{Terminal do cliente.}
+\end{figure}
+
+A operação QUIT foi bem sucedida. Após a introdução do comando QUIT a mensagem exibida foi "Jogo terminado com sucesso" o que indica a desistência do cliente pois o número de tentativas ainda não tinha sido esgotado.
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.53]{guesscomquit1}      
+        \caption{Terminal do servidor.}
+\end{figure}
+
+Após a operação QUIT ser executada o cliente é removido da lista de jogadores ativos.Assim, o dicionário encontra-se vazio pois não há nenhum cliente com um jogo iniciado.
+
+\item Clientes com o mesmo client\_id
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.53]{mesmonome}      
+        \caption{Ação da aplicação quando existem dois clientes com o mesmo id.}
+\end{figure}
+
+Havendo dois clientes com o mesmo client\_id a jogar ao mesmo tempo é de esperar que a aplicação exiba um erro a informar que já existe um cliente com esse id. Conclui-se que o programa está a funcionar corretamente pois é imprimida a mensagem "Erro: Cliente existente".
+
+\item Clientes diferentes a jogar
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.36]{doisclients}      
+        \caption{Ação da aplicação quando existem dois clientes diferentes a jogar simultaneamente.}
+\end{figure}
+
+Neste caso, como o client\_id dos dois jogadores ativos é diferente a aplicação funciona corretamente, como seria de esperar, não havendo conflitos nem ocorrência de erros.
+
+\item Introdução de comandos incorrectos
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.53]{errospropositados}      
+        \caption{Comportamento da aplicação perante introdução de comandos incorrectos.}
+\end{figure}
+
+Após a introdução de uma string em vez de um número é exibida a mensagem "Jogada deve ser um numero".E, após a introdução de um número superior ao intervalo é imprido que o número deve estar entre 0 e 100. Para além disso, quando se coloca o nome/endereço da máquina incorretamente aparece a mensagem de erro "Maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255".
+
+\item Armazenamento dos dados no ficheiro report.csv 
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.70]{ficheiro}      
+        \caption{Ficheiro report.csv}
+\end{figure}
+O ficheiro report.csv foi atualizado corretamente com os dados dos jogadores ativos no jogo.
+
+\end{itemize}
 
 
 \chapter{Conclusões}
 \label{chap.conclusao}
 
+Durante o desenvolvimento deste projeto, pudemos colocar em prática vários conhecimentos que nos foram apresentados em aula durante o semestre, tais como: sockets, comunicação de mensagens TCP entre servidores e clientes, gravação de dados em ficheiros .CSV, criptografia, testes e depuração do código, entre outros mais.
+
+O nosso objetivo com este projeto é desenvolver um jogo de adivinha o número, onde diversos clientes se podem conectar a um servidor que gerencia os jogos e armazena dados num cheiro .CSV. Este pode ser considerado um jogo simples em conceito, mas que requer esforço e dedicação para ser implementado de forma correta, clara e robusta.Os programas "client.py" e "server.py", acompanhados do pacote "common\_comm.py", formam juntos um jogo completo e totalmente funcional.
+
+O cliente é capaz de gerenciar inputs do utilizador e executar pedidos ao servidor corretamente, recorrendo às suas várias funções anteriormente descritas, tendo a certeza de que todos os dados numéricos inteiros estão seguros por uma criptografia de ponta a ponta, que foi testada graças à implementação de um teste
+unitário. O servidor por sua vez, recebe os pedidos dos vários possíveis clientes a jogar em simultâneo e é capaz de processá-los e devolver uma resposta ao cliente, criando assim uma interação completa e orgânica entre ambos os programas. Caso algo inesperado ocorra durante o jogo, os programas aqui desenvolvidos são programados para corrigir estas falhas sem consequências negativas. Por fim, a execução do jogo está também testada através de testes
+funcionais, o que torna o projeto aqui escrito numa completa demonstração de conhecimento e aplicações práticas dos conteúdos desta cadeira.
+
+Acreditamos não somente que atingimos a meta proposta para o trabalho, mas que também a excedemos em termos de aprendizagem prática. Todos os algoritmos, estratégias e motivos anteriormente descritos neste relatório constatam o longo caminho que percorremos
+para alcançar o resultado final que é aqui apresentado com orgulho.
 \chapter*{Contribuições dos autores}
+Cada aluno fez o equivalente a cinquenta por cento.
 \end{document}

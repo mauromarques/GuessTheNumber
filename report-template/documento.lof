@@ -1,0 +1,92 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\babel@toc {portuguese}{}
+\defcounter {refsection}{0}\relax 
+\addvspace {10\p@ }
+\defcounter {refsection}{0}\relax 
+\addvspace {10\p@ }
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Função que cria um ficheiro report.csv quando o servidor é inicializado.}}{2}{figure.2.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Dicionário constituído pelos dados dos jogadores e array responsável pela inicialização do header no ficheiro report.csv.}}{3}{figure.2.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Função que atualiza o ficheiro report.csv quando um jogo é terminado.}}{3}{figure.2.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Função que cria um novo cliente no jogo.}}{4}{figure.2.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Função que retorna o porto ao qual o cliente está conectado.}}{4}{figure.2.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Função chamada sempre que o servidor recebe uma nova mensagem do cliente.}}{5}{figure.2.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Suporte da jogada de um cliente - Operação GUESS.}}{6}{figure.2.7}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Função que devolve o número secreto.}}{6}{figure.2.8}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Função chamada quando o cliente pretende desistir do jogo.}}{7}{figure.2.9}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.10}{\ignorespaces Função responsável por encerrar o jogo.}}{8}{figure.2.10}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.11}{\ignorespaces Função chamada sempre que é necessário apagar um jogador da lista de jogadores ativos.}}{9}{figure.2.11}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.12}{\ignorespaces Função para encriptar valores a enviar em formato JSON com codificação base64.}}{9}{figure.2.12}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.13}{\ignorespaces Função para desencriptar valores recebidos em formato json com codificação base64.}}{10}{figure.2.13}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.14}{\ignorespaces Função que permite o funcionamento correto de todo o servidor.}}{11}{figure.2.14}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.15}{\ignorespaces Função que valida a resposta do servidor recebida pelo cliente.}}{12}{figure.2.15}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.16}{\ignorespaces Variáveis da função \textbf {run\_client}}}{12}{figure.2.16}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.17}{\ignorespaces Função \textbf {run\_client}}}{13}{figure.2.17}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.18}{\ignorespaces Caso em que é inserido o comando START.}}{13}{figure.2.18}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.19}{\ignorespaces Caso em que é inserido o comando QUIT.}}{14}{figure.2.19}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.20}{\ignorespaces Função \textbf {quit\_action}.}}{14}{figure.2.20}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.21}{\ignorespaces Caso em que é inserido o comando GUESS.}}{15}{figure.2.21}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.22}{\ignorespaces Caso em que é inserido o comando GUESS.}}{15}{figure.2.22}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.23}{\ignorespaces Caso em que é inserido o comando GUESS.}}{16}{figure.2.23}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.24}{\ignorespaces Caso em que é inserido o comando GUESS.}}{17}{figure.2.24}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.25}{\ignorespaces Caso em que é inserido o comando GUESS.}}{17}{figure.2.25}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.26}{\ignorespaces Caso em que é inserido o comando STOP.}}{17}{figure.2.26}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.27}{\ignorespaces Função para encriptar valores a enviar em formato JSON com codificação base64.}}{18}{figure.2.27}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.28}{\ignorespaces Chave de cifragem gerada e codificada no modelo Base64 para ser enviada ao servidor.}}{18}{figure.2.28}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.29}{\ignorespaces Função para desencriptar valores recebidos em formato JSON com codificação base64.}}{19}{figure.2.29}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.30}{\ignorespaces Chave de cifragem gerada e codificada no modelo Base64 para ser enviada ao servidor.}}{19}{figure.2.30}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.31}{\ignorespaces Função main}}{20}{figure.2.31}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.32}{\ignorespaces Função main}}{21}{figure.2.32}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.33}{\ignorespaces Função main}}{21}{figure.2.33}%
+\defcounter {refsection}{0}\relax 
+\addvspace {10\p@ }
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Terminal do cliente.}}{25}{figure.3.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Terminal do servidor.}}{26}{figure.3.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Terminal do cliente.}}{26}{figure.3.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Terminal do servidor.}}{27}{figure.3.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Ação da aplicação quando existem dois clientes com o mesmo id.}}{27}{figure.3.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Ação da aplicação quando existem dois clientes diferentes a jogar simultaneamente.}}{27}{figure.3.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Comportamento da aplicação perante introdução de comandos incorrectos.}}{28}{figure.3.7}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Ficheiro report.csv}}{28}{figure.3.8}%
+\defcounter {refsection}{0}\relax 
+\addvspace {10\p@ }
