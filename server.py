@@ -107,6 +107,7 @@ def new_client (client_sock, request):
 	if name in gamers['name']:
 		response = {'op': "START", 'status': False, 'error': "Cliente existente"}
 		send_dict(client_sock, response)
+		return False;
 	else:
 		gamers['name'].append(name)
 		gamers['sock_id'].append(sock_id)
@@ -119,7 +120,8 @@ def new_client (client_sock, request):
 		print(gamers)
 		response = {'op': "START", 'status': True, 'max_attempts': encrypt_intvalue(sock_id,n)}
 		send_dict(client_sock, response)
-	return None
+		return True
+
 
 # Suporte da eliminação de um cliente
 # Esta função é executada sempre que for necessário excluir um cliente do dicionario "gamers", ou seja, quando o cliente

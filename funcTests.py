@@ -15,6 +15,10 @@ def numArgs ():
     assert proc.wait() == 1
     assert proc.stdout.read().decode('utf-8') == "Deve passar como argumentos: client_id, Porto, DNS\n"
 
+    proc = Popen("python3 client.py mauro 2345 127.0.0.1 67 juju", stdout=PIPE, shell=True)
+    assert proc.wait() == 1
+    assert proc.stdout.read().decode('utf-8') == "Deve passar como argumentos: client_id, Porto, DNS\n"
+
     print("*- CLIENTE numero de argumentos inválido: PASSOU")
 
     proc = Popen("python3 server.py", stdout=PIPE, shell=True)
