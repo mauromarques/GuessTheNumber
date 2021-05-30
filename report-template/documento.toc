@@ -21,8 +21,18 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {2.2}Cliente}{11}{section.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Resultados}{12}{chapter.3}%
+\contentsline {subsection}{\numberline {2.2.1}Funcionamento geral do jogo}{11}{subsection.2.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Análise}{13}{chapter.4}%
+\contentsline {subsection}{\numberline {2.2.2}Segurança}{18}{subsection.2.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusões}{14}{chapter.5}%
+\contentsline {subsubsection}{Encriptação}{18}{section*.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{Descriptação}{19}{section*.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.2.3}Main}{19}{subsection.2.2.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}Resultados}{22}{chapter.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}Análise}{23}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Conclusões}{24}{chapter.5}%

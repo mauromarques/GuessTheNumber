@@ -123,7 +123,7 @@ Por outro lado, o dicionário "gamers" armazena os dados dos jogadores que estã
         \caption{Função que atualiza o ficheiro report.csv quando um jogo é terminado.}
 \end{figure}
 
-Quando um jogo termina com sucesso, sem sucesso ou em caso de desistência é chamada a função "update\_file" que atualiza o ficheiro report.csv com os dados do jogador.Para isso, abre o ficheiro no modo "a" (append) para adicionar dados sem escrever sobre aqueles que já lá estavam.Assim, procura pelo index "i" tal que o sock\_id é igual ao client\_id passado como parâmetro da função. Por fim, escreve todos os itens na posição "i" dos arrays do dicionário "gamers". 
+Quando um jogo termina com sucesso, sem sucesso ou em caso de desistência é chamada a função "update\_file" que atualiza o ficheiro report.csv com os dados do jogador.Para isso, abre o ficheiro no modo "a" (append) para adicionar dados sem escrever sobre aqueles que já lá estavam.Assim, procura pelo index "i" tal que o sock\_id é igual ao client\_id passado como parâmetro da função. Por fim, escreve todos os itens na posição "i" dos arrays do dicionário "gamers" no ficheiro report.csv. 
 
 \subsection{Funcionamento geral do jogo}
 \begin{figure}[H]
@@ -131,7 +131,7 @@ Quando um jogo termina com sucesso, sem sucesso ou em caso de desistência é ch
         \includegraphics[scale=0.65]{new_client}        
         \caption{Função que cria um novo cliente no jogo.}
 \end{figure}
-O jogo é iniciado quando o cliente introduz no terminal o comando "START" tornando-se num jogador ativo e provocando as seguintes ações na aplicação:
+O jogo é iniciado quando o servidor recebe uma mensagem do cliente com o comando "START" tornando-se num jogador ativo e provocando as seguintes ações no servidor:
 \begin{enumerate}
 \item Armazenamento na variável "name" do "client\_id" passado para o servidor aquando da inserção pelo utilizador na linha de comandos ao executar o cliente;
 \item Identificação do ID(porto ao qual está conectado) do cliente a partir do socket recorrendo à função "find\_client\_id";
@@ -162,7 +162,7 @@ Caso seja feito um pedido de uma operação fora do alcançe da aplicação não
         \includegraphics[scale=0.65]{guess_client}      
         \caption{Suporte da jogada de um cliente - Operação GUESS.}
 \end{figure}
-A partir do momento em que o utilizador introduz o comando GUESS encontra-se em jogo. No entanto, é essencial averiguar se o cliente que está a jogar tem realmente uma sessão iniciada no jogo.
+O utilizador deve introduzir o comando GUESS antes de inserir o seu palpite. No entanto, é essencial averiguar se o cliente que está a jogar tem realmente uma sessão iniciada no jogo.
 
 Se o jogador estiver presente no dicionário "gamers" prosseguimos com o GUESS.Caso contrário, o servidor envia uma mensagem ao cliente com o status: False; e uma mensagem de erro a indicar que este não se encontra na lista de jogadores ativos.
 
@@ -186,7 +186,7 @@ Por fim, atualiza no dicionário "gamers" o número de jogadas efetuadas.
         \includegraphics[scale=0.65]{quit_client}       
         \caption{Função chamada quando o cliente pretende desistir do jogo.}
 \end{figure}
-Caso o jogador queira desistir do jogo deverá introduzir na linha de comandos a operação QUIT.Isto induz  a função "quit\_client" a conferir se o cliente que pretende desistir encontra-se realmente em jogo. Para isto, verifica se o ID do socket está presente no dicionário "gamers".
+Caso o jogador queira desistir do jogo, o servidor recebe uma mensagem com o comando QUIT.Isto induz  a função "quit\_client" a conferir se o cliente que pretende desistir encontra-se realmente em jogo. Para isto, verifica se o ID do socket está presente no dicionário "gamers".
 
 Em caso afirmativo, o servidor envia uma mensagem ao cliente com status: True; e atualiza o ficheiro report.csv(recorrendo à função update\_file()) com o resultado "DESISTENCIA". Este resultado indica que a partida foi terminada antes de o jogador adivinhar o número secreto ou antes de atingir o limite de jogadas. Por fim, remove o cliente da lista de jogadores ativos recorrendo à função clean\_client.
 
@@ -251,19 +251,215 @@ Cada número inteiro comunicado entre o servidor e o cliente é descriptado por 
 \subsection{Main}
 \begin{figure}[H]
         \centering
-        \includegraphics[scale=0.65]{main}      
+        \includegraphics[scale=0.20]{serverMain}      
         \caption{Função que permite o funcionamento correto de todo o servidor.}
 \end{figure}
 
 Esta função permite:
 \begin{itemize}
-\item Nas linhas 271-272 verificar se o servidor é iniciado com um argumento(porto). Caso não seja, o programa encerra com uma mensagem de erro;
-\item Nas linhas 274-279 verificar se o porto é um número inteiro. Se não for, o programa é encerrado com uma mensagem de erro;
-\item Na linha 281 atruibuir o valor do porto à variável pois já foi verificada a sua validade.
+\item Nas linhas 271-273 verificar se o servidor é iniciado com um argumento(porto). Caso não seja, o programa encerra com uma mensagem de erro;
+\item Nas linhas 274-281 verificar se o porto é um número inteiro. Se não for, o programa é encerrado com uma mensagem de erro;
+\item Na linha 283 é atribuído o valor do porto à variável.
 \end{itemize}
 
 \section{Cliente}
+O programa cliente consiste em permitir que um utilizador jogue o jogo "Adivinhe o número secreto" ao introduzir as operações START, GUESS,QUIT e o seu palpite na linha de comandos.
 
+O programa cliente é constítuido por uma chave de cifragem e pelas seguintes funções: \textbf{encrypt\_intvalue}, \textbf{decrypt\_intvalue}, \textbf{validate\_response}, \textbf{quit\_action}, \textbf{run\_client} e \textbf{main}.
+\subsection{Funcionamento geral do jogo}
+Para que a aplicação funcione corretamente é essencial que exista uma função no programa cliente que valide a resposta enviada pelo servidor. Para isso é executada a função "validate\_response".
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{validateResponse}      
+        \caption{Função que valida a resposta do servidor recebida pelo cliente.}
+\end{figure}
+A resposta do servidor é válida quando é do tipo " 'op' : xxxx, 'status' : xxxx".Assim, usa-se um "try-catch" que tenta aceder aos valores de 'op' e 'status'. Se o acesso for possível é devolvido "True". Caso o acesso falhe é retornado "False".
+
+A função que gerencia o programa cliente é a função "run\_client".
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{runclient1}      
+        \caption{Variáveis da função \textbf{run\_client}}
+\end{figure}
+As variáveis da função "run\_client" desempenham as seguintes funcionalidades: 
+\begin{itemize}
+\item emUso: Enquanto estiver True, o programa irá estar à espera de novos comandos. A função STOP pode encerrar o ciclo ao mudar esta variável para False;
+\item jogadas: Número de jogadas efetuadas pelo jogador;
+\item jogMax: Número máximo de jogadas que um jogador pode fazer. É uma variável vazia até que receba o número de tentativas enviadas pelo servidor após a introdução do comando START pelo cliente;
+\item auto: Os comandos START, GUESS e QUIT devem ser introduzidos pelo utilizador. O comando STOP é inserido automaticamente pelo sistema quando é detectado o fim de um jogo. Assim, quando esta variável for TRUE, o próximo comando a ser executado será feito automaticamente pelo sistema e quando for FALSE, o programa fica à espera de um input do utilizador;
+\item nextCom: Próximo comando a ser executado em modo automático;
+\item lastAttempt: Último número jogado pelo utilizador ao executar o comando GUESS.
+\end{itemize}
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{runclient2}      
+        \caption{Função \textbf{run\_client}}
+\end{figure}
+Neste ciclo while o programa está à espera de novos comandos a serem introduzidos pelo cliente(emuso == True).Logo, se auto == False o próximo comando a ser executado deverá ser introduzido pelo utilizador. Caso contrário, o comando executado será "nextCom".
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{start}      
+        \caption{Caso em que é inserido o comando START.}
+\end{figure}
+Por outro lado, se for introduzido o comando START, o cliente envia uma mensagem ao servidor indicando a operação que deseja executar, o id do cliente(inserido na linha de comandos ao executar o programa), e a chave de cifra codificada. Ao receber uma resposta, esta será validada pela função "validate\_response" e caso seja válida: 
+\begin{enumerate}
+\item Verifica o status da resposta. Se for False, deverá imprimir uma mensagem de erro recebida do servidor. Se for True irá descriptografar o número máximo de jogadas para esta partida recorrendo à função "decrypt\_intvalue";
+\item Inicia a contagem de jogadas, atribuindo o valor zero à variável "jogadas";
+\item Mostra uma mensagem de confirmação ao utilizador.
+\end{enumerate}
+Se a resposta do servidor não for válida:
+\begin{enumerate}
+\item Mostra uma mensagem de erro referente ao erro identificado pelo servidor.
+\end{enumerate}
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{quit}      
+        \caption{Caso em que é inserido o comando QUIT.}
+\end{figure}
+Se o comando introduzido for o QUIT, o programa processa o pedido do cliente recorrendo à função "quit\_action()" e as variáveis "jogadas" e "jogMax" voltam aos seus estados iniciais.
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{quitAction}      
+        \caption{Função \textbf{quit\_action}.}
+\end{figure}
+A função \textbf{quit\_action} processa a operação QUIT. Quando o utilizador introduzir o comando QUIT no terminal esta função irá enviar uma mensagem ao servidor e aguardar por uma resposta.Esta resposta é devolvida pela função "sendrecv\_dict()".
+
+Depois, a função \textbf{quit\_action} armazena a resposta na variável "response".Seguidamente, recorrendo à função "validate\_response" verifica se a resposta é válida. Em caso afirmativo verifica o 'status' da resposta. Se o status for TRUE o jogo foi terminado com sucesso(imprime uma mensagem de sucesso). Se o status for False, indica que o servidor não encontrou o cliente atual na lista de jogadores ativos e imprime uma mensagem de erro.Caso a resposta do servidor não seja válida, é imprimida uma mensagem de erro correspondente.
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{guess1}      
+        \caption{Caso em que é inserido o comando GUESS.}
+\end{figure}
+Se o comando introduzido for GUESS, têm que ser inicializadas duas novas variáveis para verificar se o número introduzido pelo utilizador é de facto um número inteiro e se é válido(se está entre 0 e 100).
+Nas linhas 186-205 é verificado se o valor introduzido é um inteiro válido e se não for, o programa pede um novo valor ao utilizador.
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{guess2}      
+        \caption{Caso em que é inserido o comando GUESS.}
+\end{figure}
+Tendo já a certeza de que o palpite introduzido pelo cliente é um número inteiro válido prepara-se a mensagem que será enviada ao servidor. A mensagem contém o número jogado após ser criptografado recorrendo à função "encrypt\_intvalue()".
+
+Na linha 217 a variável "lastAttempt" recebe o número que foi jogado.
+Na linha 219 é verificado se o número de jogadas é igual ao número máximo de jogadas. Se sim, nada ocorre e o ciclo passa para a próxima execução.
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{guess3}      
+        \caption{Caso em que é inserido o comando GUESS.}
+\end{figure}
+Caso o jogador ainda tenha jogadas disponíveis a mensagem é enviada ao servidor e a sua resposta é validada pela função "validate\_response()".
+Nas linhas 241-242 verificamos que se a resposta for válida e se o status for True, ou seja, se o servidor não reportar erros, a resposta é processada sendo somado 1 ao número de jogadas. De seguida, é avaliado o resultado reportado pelo servidor.
+
+Se o resultado for "equals", vemos pelas linhas 244-248, que o jogador acertou no número. E, portanto é atribuído True à variável "auto" e STOP à "nextCom" ficando implícito que o jogo acabou e que o comando STOP será executado automaticamente na próxima execução do ciclo while.
+
+Nas linhas 250-251 é retratado que se o resultado for "smaller" é exibida uma mensagem "O número secreto é maior!".E, nas linhas 254-255 é imprimida uma mensagem "O número secreto é menor!" quando o resultado for "larger".
+
+No fim de cada tentativa é relembrado ao jogador o número máximo de jogadas que pode fazer e o número de jogadas que já efetuou - linha 258.
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{guess4}      
+        \caption{Caso em que é inserido o comando GUESS.}
+\end{figure}
+
+Se o número de jogadas efetuadas for igual ao número máximo de jogadas, é mostrada uma mensagem "Atingiu o limite de jogadas!Comece outro jogo para tentar novamente" e é atribuído True à variável "auto" e STOP à variável "nextCom".
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.43]{guess5}      
+        \caption{Caso em que é inserido o comando GUESS.}
+\end{figure}
+Se o status da mensagem recebida do servidor for False, é exibida uma mensagem contendo o erro reportado ao servidor - linhas 273-274.
+Se a resposta do servidor não for válida, é mostrada a respetiva mensagem de erro - linhas 275-276.
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.20]{stop}      
+        \caption{Caso em que é inserido o comando STOP.}
+\end{figure}
+
+Se o comando executado for o comando STOP, é enviada uma mensagem que será posteriormente enviada ao servidor com o valor criptografado do último número jogado e do número total de jogadas(recorrendo à função "encrypt\_intvalue()").
+Nas linhas 287-289 o jogo é terminado com sucesso se a resposta do servidor for válida e é atribuída  à variável "emUso" o valor False.
+Caso a resposta do servidor não seja válida, é exibida a respetiva mensagem de erro - linhas 291-292.
+
+
+\subsection{Segurança}
+\subsubsection{Encriptação}
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.40]{encrypt}      
+        \caption{Função para encriptar valores a enviar em formato JSON com codificação base64.}
+\end{figure}
+Cada número inteiro comunicado entre o servidor e o cliente é encriptado por blocos usando a função AES-128 no modo ECB. A encriptação é realizada do seguinte modo: 
+\begin{enumerate}
+\item Conversão do inteiro numa string binária de 128 bits já que a chave de cifragem é passada como argumento da função.
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.40]{chaveCifra}      
+        \caption{Chave de cifragem gerada e codificada no modelo Base64 para ser enviada ao servidor.}
+\end{figure}
+\item Codificação no formato Base64 para que os criptogramas sejam suportados pelo JSON;
+\item A função "encrypt\_intvalue" devolve o valor que foi codificado e encriptado para que possa ser enviado para o servidor.
+\end{enumerate}
+\subsubsection{Descriptação}
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.40]{encrypt}      
+        \caption{Função para desencriptar valores recebidos em formato JSON com codificação base64.}
+\end{figure}
+
+Cada número inteiro comunicado entre o servidor e o cliente é descriptado por blocos usando a função AES-128 em modo ECB. A descriptação ocorre do seguinte modo:
+\begin{enumerate}
+\item Descodificação dos dados passados à função "decrypt\_intvalue" como argumento no formato Base 64 já que a chave de cifragem é passada como argumento da função;
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.40]{chaveCifra}      
+        \caption{Chave de cifragem gerada e codificada no modelo Base64 para ser enviada ao servidor.}
+\end{figure}
+\item Descriptação do conteúdo dos dados;
+\item Codificação num valor inteiro e a sua devolução por parte da função.
+\end{enumerate}
+\subsection{Main}
+A função main do programa client é responsável por verificar se no momento em que o programa é executado, os argumentos são passados para a linha de comandos de forma correta.
+O programa pode ser executado de dois modos:
+\begin{itemize}
+\item Com três argumentos: ID, Porto e Máquina;
+\item Com dois argumentos: ID e Porto.
+\end{itemize}
+No caso em que a máquina está omitida nos argumentos deve-se considerar a máquina local(127.0.0.1).
+A variável "instead2" controla os modos de execução do programa. Quando instead2 == True está a funcionar em modo de dois argumentos com a máquina local automaticamente designada como destino.
+
+Vamos analisar o código desta função:
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.40]{main1}      
+        \caption{Função main}
+\end{figure}
+
+\begin{itemize}
+\item Nas linhas 310-316 é verificado se são passados três argumentos. Se tal não se verificar é verificado se foram passados dois argumentos. Neste caso, "instead" recebe o valor True. Caso contrário, o programa encerra com uma mensagem a especificar como deve ser feita a execução;
+\item Nas linhas 317-321 verifica-se se o argumento do Porto é um número inteiro ao tentar converter a sua string para int. Se a conversão falhar, o programa termina com uma mensagem de erro.E, nas linhas 322-324 é averiguado se o argumento do Porto é um número inteiro positivo;
+\item De seguida nas linhas 325-328 a máquina designada é a máquina local 127.0.0.1. caso o programa esteja a correr em modo de dois argumentos. Se isto não se verificar, é atribuída à variável o valor passado na linha de comandos e a string da máquina é separada num array de strings para que possam ser analisados os seus elementos separadamente;
+\item Nas linhas 329-331 é verificado se o array dos elementos da maquina possui quatro elementos. Se tal não acontecer é encerrado o programa com uma mensagem de erro;
+\end{itemize}
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.40]{main2}      
+        \caption{Função main}
+\end{figure}
+Aqui é verificado para cada elemento do array se são números inteiros ao tentar fazer a conversão de string para int. Verifica-se também se os elementos estão dentro do intervalo válido, entre 0 e 255. Se algum dos casos não se verificar é reportada uma mensagem de erro.
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.40]{main3}      
+        \caption{Função main}
+\end{figure}
+Por fim, tendo já verificado a validade dos argumentos passados na linha de comandos, são atribuídos às suas respetivas variáveis de acordo com o modo de execução, com dois ou três argumentos.
 
 
 \chapter{Resultados}
@@ -277,13 +473,4 @@ Esta função permite:
 \label{chap.conclusao}
 
 \chapter*{Contribuições dos autores}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter*{Acrónimos}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\printbibliography
-
 \end{document}
