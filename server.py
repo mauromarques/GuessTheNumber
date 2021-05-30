@@ -269,15 +269,18 @@ def main():
 	# O servidor deve ser iniciado com 1 argumento (porto), caso não seja, o programa é encerrado com uma mensagem
 	# de erro.
 	if len(sys.argv) != 2:
-		sys.exit("Deve passar o porto como argumento para o servidor")
+		print("Deve passar o porto como argumento para o servidor")
+		sys.exit(1)
 
 	# O porto deve ser um numero inteiro positivo, portanto, caso não seja, o programa é encerrado com uma mensagem de erro
 	try:
 		int(sys.argv[1])
 	except ValueError:
-		sys.exit("Porto deve ser um numero inteiro")
+		print("Porto deve ser um numero inteiro")
+		sys.exit(2)
 	if int(sys.argv[1])<0:
-		sys.exit("Porto deve ser um numero inteiro positivo")
+		print("Porto deve ser um numero inteiro positivo")
+		sys.exit(2)
 
 	# Aqui, ja temos certeza de que o porto é valido, portanto vamos apenas atribuir seu valor à variàvel.
 	port = int(sys.argv[1])

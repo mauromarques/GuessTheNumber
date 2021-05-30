@@ -273,19 +273,22 @@ def main():
 		if len(sys.argv) == 3:
 			instead2 = True
 		else:
-			sys.exit("Deve passar como argumentos: client_id, Porto, DNS")
+			print("Deve passar como argumentos: client_id, Porto, DNS")
+			sys.exit(1)
 
 	# Aqui verificamos se o argumento do Porto é um número inteiro ao tentar converter sua string para int. Caso a conversão
 	# falhe, encerramos o programa com uma mensagem de erro.
 	try:
 		int(sys.argv[2])
 	except ValueError:
-		sys.exit("Porto deve ser um numero inteiro")
+		print("Porto deve ser um numero inteiro")
+		sys.exit(2)
 
 	# Aqui verificamos se o argumento do Porto é um número inteiro POSITIVO. Caso não seja, encerramos o programa com
 	# uma mensagem de erro.
 	if int(sys.argv[2]) < 0:
-		sys.exit("Porto deve ser um numero inteiro positivo")
+		print("Porto deve ser um numero inteiro positivo")
+		sys.exit(2)
 
 	# Se o programa estiver a ser executado em modo de 2 argumentos, a máquina designada é a máquina local 127.0.0.1.
 	# Caso contrário, atribuimos à variável o valor passado na linha de comando.
@@ -297,7 +300,8 @@ def main():
 
 	# Caso o array dos elementos da maquina não tenha 4 elementos, encerramos o programa com uma mensagem de erro.
 	if len(maquina) != 4:
-		sys.exit("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
+		print("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
+		sys.exit(2)
 
 	# Para cada elemento do array, verificamos se são números inteiros ao tentar fazer uma conversão de String para int.
 	# Também verificamos se os elementos estão dentro do intervalo válido (maior que 0 e menor que 255).
@@ -307,9 +311,11 @@ def main():
 		try:
 			int(digito)
 		except ValueError:
-			sys.exit("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
+			print("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
+			sys.exit(2)
 		if int(digito) > 255 or int(digito) < 0:
-			sys.exit("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
+			print("maquina deve ser especificada no formato x.x.x.x, com x entre 0 e 255")
+			sys.exit(2)
 
 	# Aqui, ja temos certeza que os argumentos passados na linha de comando são validos, portanto apenas os atribuímos
 	# às suas respetivas variáveis, de acordo com o modo de execução (2 ou 3 argumentos)
